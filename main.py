@@ -10,7 +10,7 @@ from youtube_dl.utils import DownloadError
 
 # if ran locally
 # load environment variables into os 
-# load_dotenv()
+#load_dotenv()
 
 # Change only the no_category default string
 help_command = commands.DefaultHelpCommand(
