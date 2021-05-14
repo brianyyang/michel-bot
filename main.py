@@ -4,13 +4,13 @@ import os
 import youtube_dl
 from youtube_dl.utils import DownloadError 
 # if ran locally
-#from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 ''' a lot of these comments are gonna be redundant but it will help readability tbh '''
 
 # if ran locally
 # load environment variables into os 
-#load_dotenv()
+# load_dotenv()
 
 # Change only the no_category default string
 help_command = commands.DefaultHelpCommand(
