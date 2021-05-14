@@ -2,14 +2,15 @@ import discord
 from discord.ext import commands, tasks
 import os
 import youtube_dl
+from youtube_dl.utils import DownloadError 
 # if ran locally
-from dotenv import load_dotenv 
+#from dotenv import load_dotenv
 
 ''' a lot of these comments are gonna be redundant but it will help readability tbh '''
 
 # if ran locally
 # load environment variables into os 
-load_dotenv()
+#load_dotenv()
 
 # Change only the no_category default string
 help_command = commands.DefaultHelpCommand(
@@ -89,6 +90,25 @@ async def leave_voice(ctx):
 
 
 # queues a video to play from youtube
+@bot.command(name='play', help='Plays the song from youtube from the given URL.')
+async def play_song(ctx, url):
+    try:
+        # find and download the mp3 from the video
+        downloader = youtube_dl.YoutubeDL({'format': 'bestaudio', 'title': True})
+        extracted_info = downloader.extract_info(url, download=False)
+        # play the song
+        ctx.message.guild.voice_client.play(discord.FFmpegPCMAudio(extracted_info['url']))
+    except DownloadError:
+        await ctx.send(f'<@{ctx.message.author.id}>, you gave me an invalid URL.')
+    except AttributeError:
+        await ctx.send(f'<@{ctx.message.author.id}>, I\'m not connected to a voice channel.')
+
+
+# stops the curent song that is playing
+@bot.command(name='stop', help='Ends the currently playing song.')
+async def stop_song(ctx):
+    ctx.message.guild.voice_client.stop()
+
 
 ##################### HELPER FUNCTIONS #########################################################
 
