@@ -1,18 +1,25 @@
 import discord
+from discord.ext import commands, tasks
 import os
+import youtube_dl
 # if ran locally
-# from dotenv import load_dotenv 
+from dotenv import load_dotenv 
 
 ''' a lot of these comments are gonna be redundant but it will help readability tbh '''
 
 # if ran locally
 # load environment variables into os 
-# load_dotenv()
+load_dotenv()
 
-# initialize client
-client = discord.Client()
+# Change only the no_category default string
+help_command = commands.DefaultHelpCommand(
+    no_category = 'Commands'
+)
 
-#################### FLAGS TO KEEP TRACK OF ####################################################
+# initialize bot client 
+bot = commands.Bot(command_prefix='!', help_command=help_command)
+
+#################### GLOBALS TO KEEP TRACK OF ####################################################
 
 
 jocey_react_flag = True
@@ -22,40 +29,68 @@ jocey_react_flag = True
 
 
 # callback for when bot is online
-@client.event
+@bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('We have logged in as {0.user}'.format(bot))
 
 
 # callback for when bot receives a message
-@client.event
+@bot.event
 async def on_message(message):
     # ignore if I sent the message
-    if message.author == client.user:
+    if message.author == bot.user:
         return
-
-    # check if message is a command
-    if message.content.startswith('!'):
-        await handle_command(message, message.content[1:])
 
     # see helper function below
     if jocey_react_flag:
         await scary_jocey_react(message)
 
+    # check if the user inputted a command and perform it if so
+    await bot.process_commands(message)
 
-##################### HELPER FUNCTIONS #########################################################
+
+##################### COMMANDS #################################################################
 
 
-# say hello - demo function
-async def send_hello(message):
-    await message.channel.send('Hello!')
+# say hello - demo command
+@bot.command(name='hello', help='Demo command, tells me to say hi.')
+async def send_hello(ctx):
+    await ctx.message.channel.send('Hello!')
 
 
 # toggles whether or not I am reacting to messages relating to jocelyn
-async def toggle_jocey_react(message):
+@bot.command(name='jocey', help='Toggles Jocelyn reacts on appropriate messages.')
+async def toggle_jocey_react(ctx):
     global jocey_react_flag
     jocey_react_flag = not jocey_react_flag
-    await message.channel.send('Toggled Jocelyn reacts.')
+    await ctx.message.channel.send('Toggled Jocelyn reacts.')
+
+
+# joins voice to presumably start playing audio
+@bot.command(name='join', help='Tells me to join you in your voice channel.')
+async def join_voice(ctx):
+    user = ctx.message.author
+    if not user.voice:
+        await ctx.send(f'<@{user.id}>, you are not connected to a voice channel.')
+        return
+    if ctx.message.guild.voice_client and ctx.message.guild.voice_client.is_connected():
+        await ctx.send(f'<@{user.id}>, I\'m already in a voice channel.')
+        return
+    await user.voice.channel.connect()
+
+
+# leaves the voice channel I'm currently in
+@bot.command(name='leave', help=f'Tells me to leave the voice channel I\'m in.')
+async def leave_voice(ctx):
+    if ctx.message.guild.voice_client and ctx.message.guild.voice_client.is_connected():
+        await ctx.message.guild.voice_client.disconnect()
+    else:
+        await ctx.send(f'<@{ctx.message.author.id}>, I\'m not connected to a voice channel.')
+
+
+# queues a video to play from youtube
+
+##################### HELPER FUNCTIONS #########################################################
 
 
 # determines if i should react to jocelyn's message with the scaryjocey emote
@@ -90,4 +125,4 @@ async def handle_command(message, command):
 
 
 # runs the bot with its login token
-client.run(os.environ['TOKEN'])
+bot.run(os.environ['TOKEN'])
