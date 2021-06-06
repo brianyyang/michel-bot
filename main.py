@@ -4,13 +4,13 @@ import os
 import youtube_dl
 from youtube_dl.utils import DownloadError 
 # if ran locally
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 ''' a lot of these comments are gonna be redundant but it will help readability tbh '''
 
 # if ran locally
 # load environment variables into os 
-#load_dotenv()
+load_dotenv()
 
 # Change only the no_category default string
 help_command = commands.DefaultHelpCommand(
@@ -18,12 +18,12 @@ help_command = commands.DefaultHelpCommand(
 )
 
 # initialize bot client 
-bot = commands.Bot(command_prefix='!', help_command=help_command)
+bot = commands.Bot(command_prefix='?', help_command=help_command)
 
 #################### GLOBALS TO KEEP TRACK OF ####################################################
 
 
-jocey_react_flag = True
+jocey_react_flag = False
 
 
 #################### MAIN CALLBACKS ############################################################
